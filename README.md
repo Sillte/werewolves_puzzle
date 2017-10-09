@@ -21,9 +21,9 @@ of the players' statements.
 + Roles:Villagers/Wolves=4/2, PL:A~F
 #### Player's claims
 
-+ A's claim:Bœ,D›
-+ B's claim:Fœ
-+ C's claim:Dœ
++ A's claim:Bâ—,Dâ—‹
++ B's claim:Fâ—
++ C's claim:Dâ—
 
 ##### Explanation of player's statements. 
 
