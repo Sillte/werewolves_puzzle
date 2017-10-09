@@ -1,7 +1,7 @@
 # Werewolves' Puzzle Auto-Generator
 
 This is English explanation, 
-if you are Japanese please refer to [this page.]()
+if you are Japanese please refer to [this page.](http://students.hatenablog.com/entry/2017/10/03/191044)
 
 ## Introduction 
 Here, consider the puzzle inspred by the party game, "Are you a werefolf?" 
