@@ -33,3 +33,10 @@ class Villager(Player):
     @classmethod
     def get_name(cls):
         return "villager"
+
+class Lunatic(Player):
+    """ Lunatics.
+    """
+    @classmethod
+    def get_name(cls):
+        return "lunatics"

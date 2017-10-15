@@ -4,7 +4,7 @@
 import argparse
 
 from result import WhiteResult, BlackResult
-from player import Wolf, Villager
+from player import Wolf, Villager, Lunatic
 from strategy import Strategy
 
 def _index_to_alphabet(index):
@@ -19,18 +19,19 @@ class PuzzleGenereator(object):
     :param village_number: the number of villagers.
     :param wolf_number: the number of wolves.
     """
-    def __init__(self, village_number, wolf_number, lang="en"):
+    def __init__(self, village_number, wolf_number, lunatic_number, lang="en"):
         self.village_number = village_number
         self.wolf_number = wolf_number
+        self.lunatic_number = lunatic_number
 
-        if village_number <= wolf_number:
+        if village_number <= wolf_number + lunatic_number:
             raise ValueError("villager team  MUST be larger than the wolf one.")
         self.lang = lang.lower(); assert self.lang in ["en", "jp"] 
 
         self.index_to_person = self._initialize_players()
         self.answer = None
 
-        self.strategy = Strategy(self.village_number, self.wolf_number)
+        self.strategy = Strategy(self.village_number, self.wolf_number, self.lunatic_number)
 
     def generate_problem(self, max_iteration=100):
         """ Generate the problems.
@@ -66,25 +67,35 @@ class PuzzleGenereator(object):
         player_list = list()
         player_list += [Villager(index) for index in range(self.village_number)] 
         player_list += [Wolf(len(player_list) + index ) for index in range(self.wolf_number)] 
+        player_list += [Lunatic(len(player_list) + index ) for index in range(self.lunatic_number)] 
         return {index:elem for index, elem in enumerate(player_list)}
 
 
     def _create_introduction(self):
+
         person_number = len(self.index_to_person)
         if self.lang == "en":
             first_line = "## Problem"
-            second_line = "Roles:Villagers/Wolves={v}/{w}, PL:{first_pl}-{last_pl}"\
-                         .format(v=self.village_number, 
-                                 w=self.wolf_number, 
-                                 first_pl='A',
-                                 last_pl=_index_to_alphabet(person_number-1))
+            if self.lunatic_number == 0:
+                role_line = "Roles:Villager/Wolf={v}/{w}".format(v=self.village_number,
+                                                                 w=self.wolf_number)
+            else:
+                role_line = "Roles:Villager/Wolf/Lunatic={v}/{w}/{l}".format(v=self.village_number,
+                                                                              w=self.wolf_number,
+                                                                              l=self.lunatic_number)
+            player_line =  "PL:{first_pl}-{last_pl}".format(first_pl="A", last_pl=_index_to_alphabet(person_number-1))
+            second_line = role_line + ", " + player_line
         elif self.lang == "jp":
             first_line = "## 問題"
-            second_line = "内訳:村陣営/狼={v}/{w}, PL:{first_pl}-{last_pl}"\
-                         .format(v=self.village_number, 
-                                 w=self.wolf_number,
-                                 first_pl='A',
-                                 last_pl=_index_to_alphabet(person_number-1))
+            if self.lunatic_number == 0:
+                role_line = "内訳:村陣営/狼={v}/{w}".format(v=self.village_number,
+                                                                    w=self.wolf_number)
+            else:
+                role_line = "内訳:村陣営/狼/狂={v}/{w}/{l}".format(v=self.village_number,
+                                                                                 w=self.wolf_number,
+                                                                                 l=self.lunatic_number)
+            player_line =  "PL:{first_pl}-{last_pl}".format(first_pl="A", last_pl=_index_to_alphabet(person_number-1))
+            second_line = role_line + ", " + player_line
 
         return "\n".join([first_line, second_line])
 
@@ -102,7 +113,7 @@ class PuzzleGenereator(object):
         elif self.lang == "jp":
             text_lines.append("### 各PLの主張")
         else:
-            raise ValueError("Invalid languate.", self.lang)
+            raise ValueError("Invalid language.", self.lang)
 
         text_lines += [_create_player_claim(self.index_to_person[index], self.lang) for index in indices 
                      if _has_result(self.index_to_person[index]) is True ]
@@ -174,8 +185,15 @@ def create_parser():
     parser.add_argument('-wolf', '-w', type=int,
                         help="the number of wolves", default=2)
 
+    parser.add_argument('-lunatics', '-l', type=int,
+                        help="the number of lunatics", default=1)
+
     parser.add_argument('-lang', type=str,
                         help="the language", default="en", choices=['en', 'jp'])
+
+    parser.add_argument('-max_iteration', type=int,
+                        help="the maximum iterations for generator",
+                        default=100)
 
     return parser
 
@@ -183,13 +201,17 @@ def create_parser():
 if __name__ ==  "__main__":
     parser = create_parser()
     args = parser.parse_args()
+
     villager_number = args.villager
     wolf_number = args.wolf
+    lunatic_number = args.lunatics
     lang = args.lang
-    puzzle_generator = PuzzleGenereator(villager_number, wolf_number,lang) 
-    puzzle_generator.generate_problem()
+    max_iter = args.max_iteration
+
+    puzzle_generator = PuzzleGenereator(villager_number, wolf_number, lunatic_number, lang) 
+    puzzle_generator.generate_problem(max_iteration=max_iter)
     problem_text = puzzle_generator.display_problems()
     answer_text = puzzle_generator.display_answers()
     print(problem_text)
+    print()
     print(answer_text)
-    exit(0)

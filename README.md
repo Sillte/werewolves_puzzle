@@ -4,19 +4,36 @@ For Japanese, please refer to [this page.](http://students.hatenablog.com/entry/
 
 ## Introduction 
 Here, consider the puzzle inspred by the party game, "Are you a werefolf?", also known as "Mafia".  
-Each **player** is given the **role**, either **wolf** or **villager**. 
+Each **player** is given the **role**, either **villager**, **wolf**, or **lunatic**. 
 The objective of this puzzle is to discern **wolves** from **players** on the basis 
 of the players' statements.  
 
-## Rule
+## Requirements
+The Python version  of developer is 3.6.3. Exteranal library is not used. 
 
+## Usage
+
+```
+python puzzle_generator.py
+```
+
+The options can be seen by the following command, 
+
+```
+python puzzle_generator.py -h 
+```
+
+
+## Puzzle's Rule
++ The objective of puzzle is to find **Wolves**.
 + **Villagers** do never tell a lie. 
-+ **Wolves** may claim false statement. 
++ **Wolves** and **Lunatics** may claim false statement.
++ **Players** make claims that other playeres are **wolves** or not. 
 
 ## Puzzle's example  
 
 ###  Problem
-+ Roles:Villagers/Wolves=4/2, PL:A~F
++ Roles:Villager/Wolf=4/2, PL:A-F
 
 #### Player's claims
 
@@ -49,11 +66,4 @@ In this case, *D* and *A* become **wolf**.
 Remembering that *B* is wolf,  the number of wolves exceeds 2. 
 This is contradiction, hence, *C* is **wolf**. 
  
-
-This module is intended to generate automatically the pair of 
-problem and answer. 
-
-##  TODO
-
-+ the role of **Lunatics** is to be added. 
 

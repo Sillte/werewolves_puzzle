@@ -16,12 +16,13 @@ class Strategy(object):
     """ Strategy for the problem.
     When you create the new strategy, you should derive this class.  
     """
-    def __init__(self, villager_number, wolf_number):
+    def __init__(self, villager_number, wolf_number, lunatic_number):
         self.villager_number = villager_number
         self.wolf_number = wolf_number
+        self.lunatic_number = lunatic_number
         pass
 
-    def is_result_coherent(self, index_to_person, villager_indices, wolf_indices):
+    def is_result_coherent(self, index_to_person, villager_indices, wolf_indices, lunatic_indices):
         """ Check whether the result is  coherent or not. 
 
         :return: ``True``, if the result is coherent. Otherwise, ``False``.
@@ -34,14 +35,17 @@ class Strategy(object):
                 elif index_key in villager_indices:
                     if name_value != WhiteResult.get_id():
                         return False
+                elif index_key in lunatic_indices:
+                    if name_value != WhiteResult.get_id():
+                        return False
                 else:
                     raise ValueError("Invalid", index_key)
             return True
 
         assert len(villager_indices) == self.villager_number
         assert len(wolf_indices) == self.wolf_number
+        assert len(lunatic_indices) == self.lunatic_number
 
-        ## When Lunatics is added, revise this. 
         if all([_coherent_check(index_to_person[v_index].result)
                for v_index in villager_indices]):
             return True
@@ -58,15 +62,18 @@ class Strategy(object):
 
         coherent_ret_list = list()
         indices = list(range(len(index_to_person)))
-        # When lunatics are added, please revise here.  
-        for candidate in combinations(indices, self.wolf_number):
-            wolf_indices = [index for index in indices if index in candidate]
-            forseener_indices = [index for index in indices if index not in candidate]
+        for v_candidate in combinations(indices, self.villager_number):
+            villager_indices = [index for index in indices if index in v_candidate]
+            remain_indices = [index for index in indices if index not in v_candidate]
+            for w_cancidate in combinations(remain_indices, self.wolf_number):
+                wolf_indices = [index for index in remain_indices if index in w_cancidate]
+                lunatic_indices =[index for index in remain_indices if index not in w_cancidate] 
 
-            if self.is_result_coherent(index_to_person, forseener_indices, wolf_indices):
-                row = dict()
-                row["wolf_indices"] = wolf_indices
-                coherent_ret_list.append(row)
+                if self.is_result_coherent(index_to_person, villager_indices, wolf_indices, lunatic_indices):
+                    row = dict()
+                    row["wolf_indices"] = wolf_indices
+                    coherent_ret_list.append(row)
+
         return coherent_ret_list
 
 
