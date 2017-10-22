@@ -4,8 +4,9 @@
 import argparse
 
 from result import WhiteResult, BlackResult
-from player import Wolf, Villager, Lunatic
-from strategy import Strategy
+from player import Player   
+import strategy
+from strategy import Strategy, HalfForseener
 
 def _index_to_alphabet(index):
     """ Convert the index to the alphabet.
@@ -19,7 +20,8 @@ class PuzzleGenereator(object):
     :param village_number: the number of villagers.
     :param wolf_number: the number of wolves.
     """
-    def __init__(self, village_number, wolf_number, lunatic_number, lang="en"):
+    def __init__(self, village_number, wolf_number, lunatic_number,
+                 lang="en", strategy_mode=None):
         self.village_number = village_number
         self.wolf_number = wolf_number
         self.lunatic_number = lunatic_number
@@ -28,20 +30,20 @@ class PuzzleGenereator(object):
             raise ValueError("villager team  MUST be larger than the wolf one.")
         self.lang = lang.lower(); assert self.lang in ["en", "jp"] 
 
-        self.index_to_person = self._initialize_players()
+        self.index_to_player = self._initialize_players()
         self.answer = None
-
-        self.strategy = Strategy(self.village_number, self.wolf_number, self.lunatic_number)
+        strategy_class = strategy.choose_strategy(strategy_mode)
+        self.strategy = strategy_class(villager_number, wolf_number, lunatic_number)
 
     def generate_problem(self, max_iteration=100):
         """ Generate the problems.
 
         :param max_iteration: the maximum iterations.  
-        :return: True, if generated, otherwise, False. 
+        :return: ``True``, if generated, otherwise, ``False``. 
         """
-        self.answer =  self.strategy.generate_problem(self.index_to_person, max_iteration)
-        self.index_to_person = self._revise_person_id(self.index_to_person)
-        self.answer =  self.strategy.generate_problem(self.index_to_person, 1)
+        self.answer =  self.strategy.generate_problem(self.index_to_player, max_iteration)
+        self.index_to_player = self._revise_person_id(self.index_to_player)
+        self.answer =  self.strategy.generate_problem(self.index_to_player, 1)
         
 
     def display_problems(self):
@@ -64,16 +66,16 @@ class PuzzleGenereator(object):
     
 
     def _initialize_players(self):
-        player_list = list()
-        player_list += [Villager(index) for index in range(self.village_number)] 
-        player_list += [Wolf(len(player_list) + index ) for index in range(self.wolf_number)] 
-        player_list += [Lunatic(len(player_list) + index ) for index in range(self.lunatic_number)] 
-        return {index:elem for index, elem in enumerate(player_list)}
+        total_players = self.village_number + self.wolf_number + self.lunatic_number
+        player_list =[Player(index) for index in range(total_players)]
+        index_to_player = {index:elem for index, elem in enumerate(player_list)}
+                
+        return index_to_player
 
 
     def _create_introduction(self):
 
-        person_number = len(self.index_to_person)
+        person_number = len(self.index_to_player)
         if self.lang == "en":
             first_line = "## Problem"
             if self.lunatic_number == 0:
@@ -103,8 +105,8 @@ class PuzzleGenereator(object):
         def _has_result(person):
             return len(person.result) > 1
 
-        indices = sorted(self.index_to_person.keys(),
-                         key=lambda index: len(self.index_to_person[index].result),
+        indices = sorted(self.index_to_player.keys(),
+                         key=lambda index: len(self.index_to_player[index].result),
                          reverse=True)
 
         text_lines = list()
@@ -115,16 +117,16 @@ class PuzzleGenereator(object):
         else:
             raise ValueError("Invalid language.", self.lang)
 
-        text_lines += [_create_player_claim(self.index_to_person[index], self.lang) for index in indices 
-                     if _has_result(self.index_to_person[index]) is True ]
+        text_lines += [_create_player_claim(self.index_to_player[index], self.lang) for index in indices 
+                     if _has_result(self.index_to_player[index]) is True ]
 
         return "\n".join(text_lines)
 
     
-    def _revise_person_id(self, index_to_person):
+    def _revise_person_id(self, index_to_player):
         """ Sort the persons' id, by the order of the number of claims. 
 
-        :return: the changed index_to_person.
+        :return: the changed index_to_player.
         
         """
         def _replace_player_result_ids(player, replace_map):
@@ -136,22 +138,22 @@ class PuzzleGenereator(object):
             player.result[player.index] = WhiteResult.get_id()
             return player
 
-        indices = self.index_to_person.keys()
+        indices = self.index_to_player.keys()
         indices = sorted(indices,
-                         key=lambda index: len(self.index_to_person[index].result.keys()),
+                         key=lambda index: len(self.index_to_player[index].result.keys()),
                          reverse=True)
 
         replace_map = {original_id: index for index, original_id 
                        in enumerate(indices)}  
 
-        revised_index_to_person = dict()
-        for prev_index, person in self.index_to_person.items():
+        revised_index_to_player = dict()
+        for prev_index, person in self.index_to_player.items():
             person = _replace_player_result_ids(person, replace_map)
 
             next_index = replace_map[prev_index]
-            revised_index_to_person[next_index] = person
+            revised_index_to_player[next_index] = person
         
-        return revised_index_to_person
+        return revised_index_to_player
 
 
 def _create_player_claim(person, lang="en"):
@@ -180,13 +182,13 @@ def create_parser():
     """
     parser = argparse.ArgumentParser(description="Werewolves' Puzzle Generator.")
     parser.add_argument('-villager', '-v', type=int,
-                        help="the number of villagers", default=5)
+                        help="the number of villagers", default=4)
 
     parser.add_argument('-wolf', '-w', type=int,
-                        help="the number of wolves", default=2)
+                        help="the number of wolves", default=1)
 
     parser.add_argument('-lunatics', '-l', type=int,
-                        help="the number of lunatics", default=1)
+                        help="the number of lunatics", default=2)
 
     parser.add_argument('-lang', type=str,
                         help="the language", default="en", choices=['en', 'jp'])
@@ -194,6 +196,9 @@ def create_parser():
     parser.add_argument('-max_iteration', type=int,
                         help="the maximum iterations for generator",
                         default=100)
+    mode_keys = strategy.get_strategy_map().keys()
+    parser.add_argument('-strategy_mode', default=None,
+                        help="the strategy_mode", choices=list(mode_keys) + [None])
 
     return parser
 
@@ -207,11 +212,12 @@ if __name__ ==  "__main__":
     lunatic_number = args.lunatics
     lang = args.lang
     max_iter = args.max_iteration
+    strategy_mode = args.strategy_mode
 
-    puzzle_generator = PuzzleGenereator(villager_number, wolf_number, lunatic_number, lang) 
+    puzzle_generator = PuzzleGenereator(villager_number, wolf_number, lunatic_number,
+                                        lang, strategy_mode) 
     puzzle_generator.generate_problem(max_iteration=max_iter)
     problem_text = puzzle_generator.display_problems()
     answer_text = puzzle_generator.display_answers()
     print(problem_text)
-    print()
     print(answer_text)

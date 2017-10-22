@@ -1,6 +1,5 @@
 """ Player Class.
 """
-
 from result import WhiteResult
 
 class Player(object):
@@ -17,26 +16,6 @@ class Player(object):
     
     @classmethod
     def get_name(cls):
-        raise SyntaxError("Please implement this function.")
+        return "player"
     
 
-class Wolf(Player):
-    """ Wolf.
-    """
-    @classmethod
-    def get_name(cls):
-        return "wolf"
-
-class Villager(Player):
-    """ Villager.
-    """
-    @classmethod
-    def get_name(cls):
-        return "villager"
-
-class Lunatic(Player):
-    """ Lunatics.
-    """
-    @classmethod
-    def get_name(cls):
-        return "lunatics"
