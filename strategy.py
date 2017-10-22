@@ -16,7 +16,7 @@ def get_strategy_map():
     """ Return the defined strategy modes.
     """
     _mode_dict = {"half_forseener": HalfForseener,
-                  "master_wolf":OneMasterWolfStrategy, 
+                  "master_wolf": OneMasterWolfStrategy, 
                   "master_wolves":MasterWolvesStrategy}
     return _mode_dict
 
@@ -26,7 +26,7 @@ def choose_strategy(mode_key):
     if mode_key is None:
         return Strategy
     if not mode_key in mode_dict:
-        print("The corresponding strategy is not exisistent.", "mode", key)
+        print("The corresponding strategy is not exisistent.", "mode", mode_key)
         print("Default strategy is returned.")
         return Strategy
     return mode_dict[mode_key]
@@ -288,37 +288,6 @@ class HalfForseener(Strategy):
         return index_to_player
 
 
-class OneMasterWolfStrategy(Strategy):
-    """ 
-    Assure that at least one wolf exists such that his claims are right
-    except himself. 
-    """
-    def __init__(self, villager_number, wolf_number, lunatic_number):
-        super().__init__(villager_number, wolf_number, lunatic_number)
-        self.master_wolf_index = 0 
-        self.wolf_indices = range(wolf_number)
-
-    def add_claim(self, index_to_player):
-        """ Add the one claim so that the possible cases should be restricted. 
-
-        :return: ``index_to_player``, into which one claim is added. 
-        """
-
-        from_index, to_index = self.choose_add_pair_randomly(index_to_player)
-        from_player = index_to_player[from_index]
-
-        if from_index == self.master_wolf_index:
-            if to_index in self.wolf_indices:
-                from_player.result[to_index] = BlackResult.get_id()
-            else:
-                from_player.result[to_index] = WhiteResult.get_id()
-
-        elif to_index == self.master_wolf_index:
-            from_player.result[to_index] = BlackResult.get_id()
-        else:
-            claim_id = self.choose_claim_randomly(index_to_player, from_index, to_index)
-            from_player.result[to_index] = claim_id
-        return index_to_player
 
 class MasterWolvesStrategy(Strategy):
     """ 
@@ -334,6 +303,47 @@ class MasterWolvesStrategy(Strategy):
         from_player = index_to_player[from_index]
 
         if from_index in self.wolf_indices or from_index in self.villager_indices:
+            if to_index in self.wolf_indices:
+                claim_id = BlackResult.get_id()
+            else:
+                claim_id = WhiteResult.get_id()
+        else:
+            # Strategy of lunatics.
+            black= len([key for key, value in
+                   from_player.result.items() if value == BlackResult.get_id()])
+
+            if black == self.wolf_number:
+                claim_id = WhiteResult.get_id()
+            else:
+                if to_index in self.wolf_indices:
+                    claim_id = WhiteResult.get_id()
+                else:
+                    claim_id = BlackResult.get_id()
+
+        from_player.result[to_index] = claim_id
+        return index_to_player
+
+
+class OneMasterWolfStrategy(Strategy):
+    """ 
+    Assure that at least one wolf exists such that his claims are right
+    except himself. 
+    """
+    def __init__(self, villager_number, wolf_number, lunatic_number):
+        super().__init__(villager_number, wolf_number, lunatic_number)
+        self.master_wolf_index = 0 
+        self.wolf_indices = range(wolf_number)
+        self.villager_indices = range(wolf_number, wolf_number + villager_number)
+
+    def add_claim(self, index_to_player):
+        """ Add the one claim so that the possible cases should be restricted. 
+
+        :return: ``index_to_player``, into which one claim is added. 
+        """
+        from_index, to_index = self.choose_add_pair_randomly(index_to_player)
+        from_player = index_to_player[from_index]
+
+        if from_index == self.master_wolf_index or from_index in self.villager_indices:
             if to_index in self.wolf_indices:
                 claim_id = BlackResult.get_id()
             else:

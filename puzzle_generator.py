@@ -20,6 +20,8 @@ class PuzzleGenereator(object):
     :param villager_number: the number of villagers.
     :param wolf_number: the number of wolves.
     :param lunatic_number: the number of lunatics.
+    :param lang: language.
+    :param strategy_mode: the mode of generation. 
     """
     def __init__(self, villager_number, wolf_number, lunatic_number,
                  lang="en", strategy_mode=None):
