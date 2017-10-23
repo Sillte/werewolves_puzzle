@@ -1,12 +1,12 @@
-""" Create Werewolve's Puzzle.  
+""" Create Werewolve's Puzzle.
 
 """
 import argparse
 
 from result import WhiteResult, BlackResult
-from player import Player   
+from player import Player
 import strategy
-from strategy import Strategy, HalfForseener
+
 
 def _index_to_alphabet(index):
     """ Convert the index to the alphabet.
@@ -15,7 +15,7 @@ def _index_to_alphabet(index):
 
 
 class PuzzleGenereator(object):
-    """ The generator of puzzle. 
+    """ The generator of puzzle.
 
     :param villager_number: the number of villagers.
     :param wolf_number: the number of wolves.
@@ -44,11 +44,10 @@ class PuzzleGenereator(object):
         :param max_iteration: the maximum iterations.  
         :return: ``True``, if generated, otherwise, ``False``. 
         """
-        self.answer =  self.strategy.generate_problem(self.index_to_player, max_iteration)
+        self.answer = self.strategy.generate_problem(self.index_to_player, max_iteration)
         self.index_to_player = self._revise_person_id(self.index_to_player)
-        self.answer =  self.strategy.generate_problem(self.index_to_player, 1)
+        self.answer = self.strategy.generate_problem(self.index_to_player, 1)
         
-
     def display_problems(self):
         """ Display the problems.
         """
@@ -67,14 +66,12 @@ class PuzzleGenereator(object):
         answer_line = self.strategy.get_answer_line(self.answer, self.lang)
         return "\n".join([first_line, answer_line])
     
-
     def _initialize_players(self):
         total_players = self.villager_number + self.wolf_number + self.lunatic_number
-        player_list =[Player(index) for index in range(total_players)]
-        index_to_player = {index:elem for index, elem in enumerate(player_list)}
+        player_list = [Player(index) for index in range(total_players)]
+        index_to_player = {index: elem for index, elem in enumerate(player_list)}
                 
         return index_to_player
-
 
     def _create_introduction(self):
 
@@ -86,9 +83,10 @@ class PuzzleGenereator(object):
                                                                  w=self.wolf_number)
             else:
                 role_line = "Roles:Villager/Wolf/Lunatic={v}/{w}/{l}".format(v=self.villager_number,
-                                                                              w=self.wolf_number,
-                                                                              l=self.lunatic_number)
-            player_line =  "PL:{first_pl}-{last_pl}".format(first_pl="A", last_pl=_index_to_alphabet(person_number-1))
+                                                                             w=self.wolf_number,
+                                                                             l=self.lunatic_number)
+            player_line = "PL:{first_pl}-{last_pl}".format(first_pl="A",
+                                                           last_pl=_index_to_alphabet(person_number - 1))
             second_line = role_line + ", " + player_line
         elif self.lang == "jp":
             first_line = "## 問題"
@@ -99,7 +97,8 @@ class PuzzleGenereator(object):
                 role_line = "内訳:村陣営/狼/狂={v}/{w}/{l}".format(v=self.villager_number,
                                                                    w=self.wolf_number,
                                                                    l=self.lunatic_number)
-            player_line =  "PL:{first_pl}-{last_pl}".format(first_pl="A", last_pl=_index_to_alphabet(person_number-1))
+            player_line = "PL:{first_pl}-{last_pl}".format(first_pl="A",
+                                                           last_pl=_index_to_alphabet(person_number - 1))
             second_line = role_line + ", " + player_line
 
         return "\n".join([first_line, second_line])
@@ -120,12 +119,12 @@ class PuzzleGenereator(object):
         else:
             raise ValueError("Invalid language.", self.lang)
 
-        text_lines += [_create_player_claim(self.index_to_player[index], self.lang) for index in indices 
-                     if _has_result(self.index_to_player[index]) is True ]
+        text_lines += [_create_player_claim(self.index_to_player[index], self.lang)
+                       for index in indices 
+                       if _has_result(self.index_to_player[index]) is True]
 
         return "\n".join(text_lines)
 
-    
     def _revise_person_id(self, index_to_player):
         """ Sort the persons' id, by the order of the number of claims. 
 
@@ -135,7 +134,7 @@ class PuzzleGenereator(object):
         def _replace_player_result_ids(player, replace_map):
             player.index = replace_map[player.index]
             revised_result = dict()
-            revised_result = {replace_map[prev_id]:result_id
+            revised_result = {replace_map[prev_id]: result_id
                               for prev_id, result_id in player.result.items()}
             player.result = revised_result
             player.result[player.index] = WhiteResult.get_id()
@@ -163,7 +162,7 @@ def _create_player_claim(person, lang="en"):
     def _index_to_result(index):
         alphabet = _index_to_alphabet(index)
         result_id = person.result[index]
-        string_dict = {WhiteResult.get_id():"○", BlackResult.get_id():"●"}
+        string_dict = {WhiteResult.get_id(): "○", BlackResult.get_id(): "●"}
         result_string = string_dict[result_id]
         return "{0}{1}".format(alphabet, result_string)
 
@@ -206,7 +205,7 @@ def create_parser():
     return parser
 
 
-if __name__ ==  "__main__":
+if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
 

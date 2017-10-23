@@ -2,6 +2,7 @@
 """
 from result import WhiteResult
 
+
 class Player(object):
     """ Abstract class for players.
     The player is identified **index**. 
@@ -17,5 +18,3 @@ class Player(object):
     @classmethod
     def get_name(cls):
         return "player"
-    
-

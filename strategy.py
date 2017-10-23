@@ -7,17 +7,19 @@ from itertools import combinations
 from result import WhiteResult, BlackResult
 from player import Player   
 
+
 def _index_to_alphabet(index):
     """ Convert the index to the alphabet.
     """
     return chr(ord("A") + index)
+
 
 def get_strategy_map():
     """ Return the defined strategy modes.
     """
     _mode_dict = {"half_forseener": HalfForseener,
                   "master_wolf": OneMasterWolfStrategy, 
-                  "master_wolves":MasterWolvesStrategy}
+                  "master_wolves": MasterWolvesStrategy}
     return _mode_dict
 
 
@@ -25,7 +27,7 @@ def choose_strategy(mode_key):
     mode_dict = get_strategy_map()
     if mode_key is None:
         return Strategy
-    if not mode_key in mode_dict:
+    if mode_key not in mode_dict:
         print("The corresponding strategy is not exisistent.", "mode", mode_key)
         print("Default strategy is returned.")
         return Strategy
@@ -41,7 +43,6 @@ class Strategy(object):
         self.wolf_number = wolf_number
         self.lunatic_number = lunatic_number
         pass
-
 
     def is_result_coherent(self, index_to_player, villager_indices, wolf_indices, lunatic_indices):
         """ Check whether the result is  coherent or not. 
@@ -72,7 +73,6 @@ class Strategy(object):
             return True
         return False
         
-
     def get_coherent_cases(self, index_to_player):
         """ Return the cases where the results are coherent.
 
@@ -87,12 +87,14 @@ class Strategy(object):
         number_list = [self.villager_number, self.wolf_number, self.lunatic_number]
         for indices_list in _multiple_combination(indices, number_list):
             villager_indices, wolf_indices, lunatic_indices = indices_list
-            if self.is_result_coherent(index_to_player, villager_indices, wolf_indices, lunatic_indices):
+            if self.is_result_coherent(index_to_player,
+                                       villager_indices,
+                                       wolf_indices,
+                                       lunatic_indices):
                 row = dict()
                 row["wolf_indices"] = wolf_indices
                 coherent_ret_list.append(row)
         return coherent_ret_list
-
 
     def add_claim(self, index_to_player):
         """ Add the one claim so that the possible cases should be restricted. 
@@ -105,12 +107,11 @@ class Strategy(object):
         from_player.result[to_index] = claim_id
         return index_to_player
 
-
     def choose_add_pair_randomly(self, index_to_player):
         """ Choose the pair of players randomly at adding claims.  
         """
         from_target_indices = [index for index, player in index_to_player.items()
-                              if not self.is_player_full_results(player)]
+                               if not self.is_player_full_results(player)]
         from_index = random.choice(from_target_indices)
         from_player = index_to_player[from_index]
 
@@ -119,7 +120,6 @@ class Strategy(object):
                      if index not in current_indices]
         to_index = random.choice(to_target)
         return from_index, to_index
-
 
     def delete_claim(self, index_to_player): 
         """ Delete the one claim so that the possible cases should be expanded. 
@@ -131,7 +131,6 @@ class Strategy(object):
 
         return index_to_player
     
-
     def choose_delete_pair_randomly(self, index_to_player):
         """ Choose the pair of players randomly at adding claims.  
         """
@@ -143,7 +142,6 @@ class Strategy(object):
         to_index = random.choice(to_target)
         return from_index, to_index
 
-
     def choose_claim_randomly(self, index_to_player, from_index, to_index):
         """ Choose the result claims stated by ***from_index** player.  
         Simply speaking, the result is selected randomly, however,clear illogical
@@ -152,11 +150,11 @@ class Strategy(object):
         :return: the id of result. 
         """
         from_player = index_to_player[from_index]
-        black= len([key for key, value in
-                   from_player.result.items() if value == BlackResult.get_id()])
+        black = len([key for key, value in
+                    from_player.result.items() if value == BlackResult.get_id()])
 
-        white= len([key for key, value in
-                   from_player.result.items() if value == WhiteResult.get_id()])
+        white = len([key for key, value in
+                    from_player.result.items() if value == WhiteResult.get_id()])
 
         if self.wolf_number == black:
             return WhiteResult.get_id()
@@ -164,12 +162,10 @@ class Strategy(object):
         if self.villager_number + self.lunatic_number == white:  
             return BlackResult.get_id()
         
-
-        if random.random() <= 1/2:
+        if random.random() <= 1 / 2:
             return WhiteResult.get_id()
         else:
             return BlackResult.get_id()
-
 
     def generate_problem(self, index_to_player, max_iteration):
         """ Generate the problem.
@@ -224,7 +220,7 @@ class HalfForseener(Strategy):
     def __init__(self, villager_number, wolf_number, lunatic_number):
         def _half_number(number):
             number = number / 2
-            if random.random() < 1/2:
+            if random.random() < 1 / 2:
                 return math.floor(number)
             return math.ceil(number)
 
@@ -238,13 +234,13 @@ class HalfForseener(Strategy):
         total_number = total_forseeners + wolf_non_forseener_number
         target_indices = range(total_number)
         p_list = _partition_sequence(target_indices,
-                                    [villager_forseener_number, wolf_forseener_number, lunatic_forseener_number,
-                                     wolf_non_forseener_number])
+                                     [villager_forseener_number,
+                                      wolf_forseener_number, lunatic_forseener_number,
+                                      wolf_non_forseener_number])
         self.villager_forseener_indices = p_list[0]
         self.wolf_forseener_indices = p_list[1]
         self.lunatic_forseener_indices = p_list[2]
         self.wolf_non_forseener_indices = p_list[3]
-
 
     def add_claim(self, index_to_player):
         """ Add the one claim so that the possible cases should be restricted. 
@@ -256,11 +252,10 @@ class HalfForseener(Strategy):
                    (index in self.wolf_forseener_indices) or \
                    (index in self.lunatic_forseener_indices) 
         from_target_indices = [index for index, person in index_to_player.items()
-                              if not self.is_player_full_results(person)]
+                               if not self.is_player_full_results(person)]
 
         from_target_indices = [index for index in from_target_indices
-                              if _is_forseener_target(index)]
-
+                               if _is_forseener_target(index)]
 
         if not from_target_indices:
             return self.delete_claim(index_to_player)
@@ -281,12 +276,11 @@ class HalfForseener(Strategy):
             else:
                 from_person.result[to_index] = WhiteResult.get_id()
         else:
-            if 0 <= random.random() <= 1/2:
+            if 0 <= random.random() <= 1 / 2:
                 from_person.result[to_index] = WhiteResult.get_id()
             else:
                 from_person.result[to_index] = BlackResult.get_id()
         return index_to_player
-
 
 
 class MasterWolvesStrategy(Strategy):
@@ -365,11 +359,11 @@ class OneMasterWolfStrategy(Strategy):
         return index_to_player
 
                 
-#Utility functions. 
+# Utility functions. 
 def _multiple_combination(sequence, number_list):
     assert sum(number_list) <= len(sequence) 
     sequence = tuple(sequence)
-    indices  = list(range(len(sequence)))
+    indices = list(range(len(sequence)))
 
     def _inner(remain_indices, num_list, current_list):
         if not num_list:
@@ -379,10 +373,11 @@ def _multiple_combination(sequence, number_list):
         for c_indices in combinations(remain_indices, num_list[0]):
             candidate = [sequence[c_index] for c_index in c_indices]
             next_current_list = current_list + [candidate]
-            next_remain_indices = [index for index in remain_indices if not index in c_indices]
-            yield from  _inner(next_remain_indices, num_list[1:] , next_current_list)
+            next_remain_indices = [index for index in remain_indices if index not in c_indices]
+            yield from _inner(next_remain_indices, num_list[1:], next_current_list)
 
     yield from _inner(indices, number_list, []) 
+
 
 def _partition_sequence(sequence, number_list):
     assert len(sequence) == sum(number_list)
@@ -400,4 +395,3 @@ if __name__ == "__main__":
     for elem in _multiple_combination(["A", "B", "C", "D"], [2, 1]):
         print(elem)
     print(_partition_sequence(range(6), [1, 2, 3]))
-
