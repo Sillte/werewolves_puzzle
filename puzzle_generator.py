@@ -56,7 +56,7 @@ class PuzzleGenereator(object):
         return "\n".join([intro_text, claims_text])
 
     def display_answers(self):
-        """ Display the answers.
+        """ Display the answers.             
         """
         assert self.answer
         if self.lang == "en":

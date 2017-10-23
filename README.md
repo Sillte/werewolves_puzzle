@@ -9,7 +9,7 @@ The objective of this puzzle is to discern **wolves** from **players** on the ba
 of the players' statements. 
 
 ## Requirements
-The Python version of developer is 3.6.3. External library is not used. 
+My python version is 3.6.3. External library is not used for this repository. 
 
 ## Usage
 
@@ -31,10 +31,10 @@ python puzzle_generator.py -h
 
 
 ## Puzzle's Rule
-+ The objective of puzzle is to find **Wolves**.
++ The objective of puzzle is to find **wolves**.
 + **Players** make claims that other playeres are **wolves** or not. 
 + **Villagers** do never tell a lie. 
-+ **Wolves** and **Lunatics** may claim false statement.
++ **Wolves** and **lunatics** may claim false statement.
 
 ## Puzzle's example 
 
@@ -90,14 +90,14 @@ Wolves:B
 The process of generation is simple. 
 The core function of generation is **strategy.generate_problem**. 
 
-+ Check whether the uniqueness of coherent cases in which all players' statements are coherent.
-+ If the coherent cases are more than one, then add the claim of player. 
++ Check whether the uniqueness of coherent cases in which all players' statements do not contradict each other.
++ If the coherent cases are more than one, then add the claim of player.
 + If the coherent cases do not exist, then delete the claim of player. 
 
 The function iterates the above until the unique case is found. 
 
 By overriding the function of adding or deleting claims of players, 
-the properties of problems are to change. (see the derived classes of **Strategy**.)
+the properties of problems change. (see the derived classes of **Strategy**.)
 
 When you create the subclass of **Strategy**, add the class to 
 *_mode_dict* in **get_strategy_map**.
