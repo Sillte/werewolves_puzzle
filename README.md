@@ -1,9 +1,9 @@
 # Werewolves' Puzzle Auto-Generator
 
-For Japanese, please refer to [this page.](http://students.hatenablog.com/entry/2017/10/03/191044)
+For Japanese, please refer to [this page.](http://students.hatenablog.com/entry/2017/11/03/190643)
 
 ## Introduction 
-Here, consider the puzzle inspired by the party game, "Are you a werewolf?", also known as "Mafia". 
+This module generates the puzzle inspired by the party game, "Are you a werewolf?", also known as "Mafia". 
 Each **player** is given the **role**, either **villager**, **wolf**, or **lunatic**. 
 The objective of this puzzle is to discern **wolves** from **players** on the basis 
 of the players' statements. 
@@ -33,8 +33,8 @@ python puzzle_generator.py -h
 ## Puzzle's Rule
 + The objective of puzzle is to find **wolves**.
 + **Players** make claims that other playeres are **wolves** or not. 
-+ **Villagers** do never tell a lie. 
-+ **Wolves** and **lunatics** may claim false statement.
++ **Villagers** do never tell lies. 
++ **Wolves** and **lunatics** may claim false statements.
 
 ## Puzzle's example 
 
@@ -91,13 +91,13 @@ The process of generation is simple.
 The core function of generation is **strategy.generate_problem**. 
 
 + Check whether the uniqueness of coherent cases in which all players' statements do not contradict each other.
-+ If the coherent cases are more than one, then add the claim of player.
-+ If the coherent cases do not exist, then delete the claim of player. 
++ If the coherent cases are more than one, then add the claim of a player.
++ If the coherent cases do not exist, then delete the claim of a player. 
 
-The function iterates the above until the unique case is found. 
+This function iterates the above until the unique coherent case is found. 
 
-By overriding the function of adding or deleting claims of players, 
-the properties of problems change. (see the derived classes of **Strategy**.)
+By overriding the functions of adding or deleting claims of players, 
+the properties of the generated problem change. (see the derived classes of **Strategy**.)
 
 When you create the subclass of **Strategy**, add the class to 
 *_mode_dict* in **get_strategy_map**.
